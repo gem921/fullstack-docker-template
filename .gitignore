@@ -1,0 +1,23 @@
+# 构建产物 / 业务文件（不应提交到仓库，部署时各自放置）
+backend/*.jar
+frontend/dist/*
+!frontend/dist/.gitkeep
+
+# SSL 证书与私钥（敏感，严禁提交到公开仓库）
+frontend/ssl/*
+!frontend/ssl/.gitkeep
+*.pem
+*.key
+*.crt
+
+# 运行日志
+backend/logs/*
+frontend/logs/*
+!**/logs/.gitkeep
+
+# 常见环境 / 编辑器文件
+.env
+.env.*
+.idea/
+.vscode/
+.DS_Store

@@ -1,0 +1,37 @@
+services:
+  # 后端服务（Spring Boot）
+  backend:
+    image: backend:v1.0.0  # 镜像名:版本号，每次发布建议手动 +1，方便回滚
+    container_name: backend
+    build:
+      context: ./backend  # 后端目录，包含 Dockerfile 和打包好的 jar
+    expose:
+      - "8080"  # 仅在 compose 内网暴露，由前端 nginx 反向代理，不映射到宿主机
+    volumes:
+      - /opt/app-data:/opt/data  # 业务数据/上传文件，持久化到宿主机（按需修改）
+      - /opt/backend/logs:/opt/logs  # 日志挂载到宿主机，便于排查
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod  # 激活的 Spring 配置文件
+      - TZ=Asia/Shanghai  # 时区
+    restart: unless-stopped  # 容器崩溃或宿主机重启后自动拉起
+    networks:
+      - app-network
+
+  # 前端服务（Nginx）
+  frontend:
+    image: frontend:v1.0.0
+    container_name: frontend
+    build:
+      context: ./frontend  # 前端目录，dist/ssl/default.conf 已全部打进镜像
+    ports:
+      - "80:80"  # HTTP 端口映射
+      - "443:443"  # HTTPS 端口映射
+    restart: unless-stopped
+    depends_on:
+      - backend  # 确保后端先启动
+    networks:
+      - app-network
+
+networks:
+  app-network:  # 自定义 bridge 网络，确保容器间可通过服务名互相访问
+    driver: bridge
